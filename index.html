@@ -25,17 +25,11 @@ button:disabled{cursor:default}
 ::-webkit-scrollbar-track{background:#100D22}
 ::-webkit-scrollbar-thumb{background:linear-gradient(180deg,#8B5CF6,#D946EF);border-radius:8px}
 
-.bg{position:fixed;inset:0;z-index:-2;overflow:hidden;background:radial-gradient(900px 600px at 10% -10%,#1B1040 0%,transparent 60%),radial-gradient(700px 500px at 110% 20%,#2A0E3E 0%,transparent 55%),radial-gradient(800px 700px at 50% 120%,#0A1B3A 0%,transparent 60%),#07060F}
-.blob{position:absolute;border-radius:50%;filter:blur(80px);opacity:.4;mix-blend-mode:screen}
-.b1{width:380px;height:380px;left:-120px;top:-100px;background:#5B21B6;animation:d1 40s ease-in-out infinite alternate}
-.b2{width:340px;height:340px;right:-100px;top:20%;background:#86198F;animation:d2 48s ease-in-out infinite alternate}
-.b3{width:420px;height:420px;left:20%;bottom:-220px;background:#1E3A8A;animation:d3 56s ease-in-out infinite alternate}
-@keyframes d1{to{transform:translate(90px,70px) scale(1.15)}}
-@keyframes d2{to{transform:translate(-80px,-60px) scale(1.2)}}
-@keyframes d3{to{transform:translate(70px,-90px) scale(1.1)}}
-.grain{position:fixed;inset:0;z-index:-1;pointer-events:none;opacity:.05;mix-blend-mode:overlay;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)' opacity='.55'/%3E%3C/svg%3E")}
+/* фон: статичные слои, без mix-blend-mode и backdrop-filter — именно они рябили на iOS */
+.bg{position:fixed;inset:0;z-index:-2;background:radial-gradient(900px 600px at 12% -8%,#231249 0%,rgba(35,18,73,0) 62%),radial-gradient(760px 520px at 108% 18%,#31103F 0%,rgba(49,16,63,0) 58%),radial-gradient(900px 760px at 50% 118%,#0B1C3D 0%,rgba(11,28,61,0) 62%),#07060F}
+.grain{position:fixed;inset:0;z-index:-1;pointer-events:none;opacity:.022;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)' opacity='.6'/%3E%3C/svg%3E")}
 
-.top{position:sticky;top:0;z-index:50;background:rgba(9,7,20,.82);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border-bottom:1px solid rgba(168,140,255,.14);padding:calc(8px + env(safe-area-inset-top)) 14px 8px}
+.top{position:sticky;top:0;z-index:50;background:#0B0918;border-bottom:1px solid rgba(168,140,255,.16);padding:calc(8px + env(safe-area-inset-top)) 14px 8px}
 .top-in{max-width:640px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;gap:10px}
 .brand{display:flex;align-items:center;gap:9px}
 .brand svg{width:30px;height:30px}
@@ -45,7 +39,7 @@ button:disabled{cursor:default}
 .sound-btn.off{border-color:rgba(255,77,109,.4);background:rgba(255,77,109,.08);color:#FF9AAC}
 
 main{max-width:640px;margin:0 auto;padding:12px 12px calc(var(--dock-h,150px) + 22px);display:flex;flex-direction:column;gap:12px}
-.card{background:linear-gradient(180deg,rgba(30,23,56,.75),rgba(18,14,38,.9));border:1px solid rgba(168,140,255,.15);border-radius:18px;box-shadow:0 18px 50px rgba(0,0,0,.45);backdrop-filter:blur(8px);padding:14px;animation:rise .5s both}
+.card{background:linear-gradient(180deg,#1C1637,#130F28);border:1px solid rgba(168,140,255,.15);border-radius:18px;box-shadow:0 18px 50px rgba(0,0,0,.45);padding:14px;animation:rise .5s both}
 @keyframes rise{from{opacity:0;transform:translateY(14px)}}
 .hud{display:flex;gap:6px;flex-wrap:wrap;padding:10px 12px}
 .chip{font-size:11px;font-weight:700;padding:5px 9px;border-radius:999px;border:1px solid rgba(168,140,255,.2);color:#9D95BD;background:rgba(139,92,246,.07);white-space:nowrap}
@@ -65,7 +59,7 @@ main{max-width:640px;margin:0 auto;padding:12px 12px calc(var(--dock-h,150px) + 
 .btn.ghost{border-color:rgba(168,140,255,.25);color:#C4B5FD;background:rgba(139,92,246,.06)}
 .btn.ghost:active:not(:disabled){transform:scale(.97)}
 .btn.ghost:disabled{opacity:.4}
-.canvas-wrap{position:relative;height:168px;border-radius:12px;background:linear-gradient(180deg,rgba(11,8,24,.7),rgba(13,10,28,.4));border:1px solid rgba(168,140,255,.12);overflow:hidden}
+.canvas-wrap{position:relative;height:168px;border-radius:12px;background:linear-gradient(180deg,#0E0B1D,#110D22);border:1px solid rgba(168,140,255,.12);overflow:hidden}
 .canvas-wrap canvas{display:block;width:100%;height:100%}
 .status{min-height:40px;font-size:13px;font-weight:600;color:#C9C2E4;line-height:1.45;margin-top:9px}
 .status .good{color:#96F04B}.status .bad{color:#FF6B87}.status .up{color:#FFB224}.status .down{color:#6E9BFF}.status .same{color:#C9BFFF}
@@ -79,7 +73,7 @@ main{max-width:640px;margin:0 auto;padding:12px 12px calc(var(--dock-h,150px) + 
 .card h2{font-family:'Unbounded',sans-serif;font-size:11px;font-weight:700;letter-spacing:.13em;text-transform:uppercase;color:#C4B5FD;margin-bottom:11px;display:flex;align-items:center;gap:7px}
 .card h2::before{content:'';width:12px;height:3px;border-radius:2px;background:linear-gradient(90deg,#8B5CF6,#D946EF)}
 .seg-row{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px}
-.seg{display:flex;gap:3px;background:rgba(10,7,22,.7);border:1px solid rgba(168,140,255,.16);border-radius:11px;padding:3px}
+.seg{display:flex;gap:3px;background:#0C0919;border:1px solid rgba(168,140,255,.16);border-radius:11px;padding:3px}
 .seg button{flex:1;padding:9px 4px;border-radius:8px;font-size:10.5px;font-weight:800;color:#9D95BD;min-height:38px}
 .seg button.on{background:linear-gradient(135deg,#8B5CF6,#6D28D9);color:#fff;box-shadow:0 3px 12px rgba(139,92,246,.35)}
 .ctl{margin-bottom:10px}
@@ -93,7 +87,7 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:22px;heigh
 .presets button{flex:1;font-size:10px;font-weight:700;color:#9D95BD;border:1px solid rgba(168,140,255,.2);border-radius:8px;padding:7px 3px;min-height:34px}
 .two{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 .select-row{display:grid;grid-template-columns:1fr auto;gap:8px;align-items:center;margin-bottom:10px}
-select{width:100%;min-height:46px;background:rgba(10,7,22,.8);color:#F3EFFC;border:1px solid rgba(168,140,255,.25);border-radius:12px;padding:0 36px 0 12px;font-family:inherit;font-size:13px;font-weight:700;-webkit-appearance:none;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23C4B5FD' stroke-width='2' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center}
+select{width:100%;min-height:46px;background:#0C0919;color:#F3EFFC;border:1px solid rgba(168,140,255,.25);border-radius:12px;padding:0 36px 0 12px;font-family:inherit;font-size:13px;font-weight:700;-webkit-appearance:none;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23C4B5FD' stroke-width='2' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center}
 .tgl-row{display:flex;gap:8px}
 .tgl-item{flex:1;display:flex;justify-content:space-between;align-items:center;gap:6px;padding:9px 10px;border:1px solid rgba(168,140,255,.12);border-radius:11px;background:rgba(139,92,246,.05)}
 .tgl-item span{font-size:11px;font-weight:700;color:#C9C2E4}
@@ -129,7 +123,7 @@ body.is-done .results{display:flex}
 .hint-card{font-size:11.5px;color:#9D95BD;line-height:1.55}
 .hint-card b{color:#C9C2E4}
 
-.dock{position:fixed;left:0;right:0;bottom:0;z-index:60;background:rgba(9,7,20,.94);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);border-top:1px solid rgba(168,140,255,.2);padding:9px 12px calc(9px + env(safe-area-inset-bottom));box-shadow:0 -14px 40px rgba(0,0,0,.5)}
+.dock{position:fixed;left:0;right:0;bottom:0;z-index:60;background:#0B0918;border-top:1px solid rgba(168,140,255,.2);padding:9px 12px calc(9px + env(safe-area-inset-bottom));box-shadow:0 -14px 40px rgba(0,0,0,.5)}
 .dock-in{max-width:640px;margin:0 auto}
 .dock-status{font-size:12px;font-weight:700;color:#C9C2E4;text-align:center;margin-bottom:8px;min-height:17px}
 .dock-status .up{color:#FFB224}.dock-status .down{color:#6E9BFF}.dock-status .same{color:#C9BFFF}
@@ -167,7 +161,7 @@ body.is-done .results{display:flex}
 </style>
 </head>
 <body>
-<div class="bg"><div class="blob b1"></div><div class="blob b2"></div><div class="blob b3"></div></div>
+<div class="bg"></div>
 <div class="grain"></div>
 
 <header class="top">
@@ -299,19 +293,30 @@ const store={get(k,d){try{const v=JSON.parse(localStorage.getItem(k));return v==
 }catch(e){}})();
 
 const SONGS=[
- {id:'ode',title:'Ода к радости',author:'Бетховен',notes:[64,64,65,67,67,65,64,62,60,60,62,64,64,62,62]},
- {id:'twinkle',title:'Звёздочка (Twinkle)',author:'нар.',notes:[60,60,67,67,69,69,67,65,65,64,64,62,62,60]},
- {id:'jingle',title:'Jingle Bells',author:'Дж. Пирпонт',notes:[64,64,64,64,64,64,64,67,60,62,64,65,65,65,65,65,64,64,64,64,62,62,64,62,67]},
- {id:'mary',title:'У Мэри был ягнёнок',author:'нар.',notes:[64,62,60,62,64,64,64,62,62,62,64,67,67]},
- {id:'frere',title:'Братец Яков',author:'фр. нар.',notes:[60,62,64,60,60,62,64,60,64,65,67,64,65,67]},
- {id:'hb',title:'Happy Birthday',author:'П. и М. Хилл',notes:[67,67,69,67,72,71,67,67,69,67,74,72,67,67,79,76,72,71,69,77,77,76,72,74,72]},
- {id:'smoke',title:'Smoke on the Water',author:'Deep Purple',notes:[67,70,72,67,70,73,72,67,70,72,70,67]},
- {id:'seven',title:'Seven Nation Army',author:'The White Stripes',notes:[64,64,67,64,62,60,59]},
- {id:'imperial',title:'Имперский марш',author:'Дж. Уильямс',notes:[67,67,67,63,70,67,63,70,67]},
- {id:'mozart',title:'Ночная серенада',author:'Моцарт',notes:[62,67,62,67,62,67,71,74]},
- {id:'nokia',title:'Рингтон Nokia',author:'Ф. Таррега',notes:[76,74,66,68,73,71,62,64,71,69,61,64,69]},
- {id:'elise',title:'К Элизе',author:'Бетховен',notes:[76,75,76,75,76,71,74,72,69,60,64,69,71,64,68,71,72]},
- {id:'potter',title:'Тема Гарри Поттера',author:'Дж. Уильямс',notes:[71,76,79,78,76,83,81,78]}
+ {id:'ode',group:'Классика и народные',title:'Ода к радости',author:'Бетховен',notes:[64,64,65,67,67,65,64,62,60,60,62,64,64,62,62]},
+ {id:'twinkle',group:'Классика и народные',title:'Звёздочка (Twinkle)',author:'нар.',notes:[60,60,67,67,69,69,67,65,65,64,64,62,62,60]},
+ {id:'jingle',group:'Классика и народные',title:'Jingle Bells',author:'Дж. Пирпонт',notes:[64,64,64,64,64,64,64,67,60,62,64,65,65,65,65,65,64,64,64,64,62,62,64,62,67]},
+ {id:'mary',group:'Классика и народные',title:'У Мэри был ягнёнок',author:'нар.',notes:[64,62,60,62,64,64,64,62,62,62,64,67,67]},
+ {id:'frere',group:'Классика и народные',title:'Братец Яков',author:'фр. нар.',notes:[60,62,64,60,60,62,64,60,64,65,67,64,65,67]},
+ {id:'hb',group:'Классика и народные',title:'Happy Birthday',author:'П. и М. Хилл',notes:[67,67,69,67,72,71,67,67,69,67,74,72,67,67,79,76,72,71,69,77,77,76,72,74,72]},
+ {id:'elise',group:'Классика и народные',title:'К Элизе',author:'Бетховен',notes:[76,75,76,75,76,71,74,72,69,60,64,69,71,64,68,71,72]},
+ {id:'mozart',group:'Классика и народные',title:'Ночная серенада',author:'Моцарт',notes:[62,67,62,67,62,67,71,74]},
+ {id:'smoke',group:'Рок · кино · поп',title:'Smoke on the Water',author:'Deep Purple',notes:[67,70,72,67,70,73,72,67,70,72,70,67]},
+ {id:'seven',group:'Рок · кино · поп',title:'Seven Nation Army',author:'The White Stripes',notes:[64,64,67,64,62,60,59]},
+ {id:'imperial',group:'Рок · кино · поп',title:'Имперский марш',author:'Дж. Уильямс',notes:[67,67,67,63,70,67,63,70,67]},
+ {id:'potter',group:'Рок · кино · поп',title:'Тема Гарри Поттера',author:'Дж. Уильямс',notes:[71,76,79,78,76,83,81,78]},
+ {id:'nokia',group:'Рок · кино · поп',title:'Рингтон Nokia',author:'Ф. Таррега',notes:[76,74,66,68,73,71,62,64,71,69,61,64,69]},
+ {id:'mindset',group:'Рок · кино · поп',title:'Got My Mind Set on You',author:'George Harrison · хук',notes:[67,67,67,69,67,64,64,67,67,67,69,67,64,64,64,64,64,65,64,62,62]},
+ {id:'pretty',group:'Рок · кино · поп',title:'Oh, Pretty Woman',author:'Roy Orbison · рифф',notes:[69,69,69,66,66,62,62,64,66,69,66,64,62]},
+ {id:'tiger',group:'Рок · кино · поп',title:'Eye of the Tiger',author:'Survivor · рифф',notes:[60,60,60,60,63,60,58,60,60,60,60,60,63,60,58,60]},
+ {id:'dust',group:'Рок · кино · поп',title:'Another One Bites the Dust',author:'Queen · бас-рифф',notes:[64,64,64,64,64,64,67,64,62,64,64,64,64,64,64,67,64,62]},
+ {id:'together',group:'Рок · кино · поп',title:'Come Together',author:'The Beatles · рифф',notes:[62,62,62,65,62,69,67,62,62,62,65,62,69,67]},
+ {id:'wouldyou',group:'Соул · фанк · джаз · латина',title:'Would You?',author:'Touch and Go · хук',notes:[69,69,72,74,76,74,72,69,67,69,72,74,72,69,67]},
+ {id:'tequila',group:'Соул · фанк · джаз · латина',title:'Tequila',author:'The Champs · рифф',notes:[67,67,67,67,70,67,65,67,67,67,67,67,70,67,65,67,67,67,67,67,70,67,65,67]},
+ {id:'hitroad',group:'Соул · фанк · джаз · латина',title:'Hit the Road Jack',author:'Ray Charles · хук',notes:[69,69,69,69,67,65,64,64,64,64,64,62,60,59,59,59,59,59,57,55,52]},
+ {id:'standby',group:'Соул · фанк · джаз · латина',title:'Stand By Me',author:'Ben E. King · бас-рифф',notes:[72,72,72,72,69,69,69,69,65,65,65,65,67,67,67,67]},
+ {id:'superstition',group:'Соул · фанк · джаз · латина',title:'Superstition',author:'Stevie Wonder · рифф',notes:[63,63,63,63,66,63,61,63,63,63,63,63,66,63,61,63]},
+ {id:'billie',group:'Соул · фанк · джаз · латина',title:'Billie Jean',author:'Michael Jackson · бас-рифф',notes:[54,54,61,61,64,64,61,61,54,54,61,61,64,64,61,61]}
 ];
 const LEVELS=[[0,'Новичок'],[150,'Слышу контур'],[400,'Ловец направления'],[800,'Чую интервалы'],[1400,'Мелодист'],[2200,'Слух-снайпер'],[3200,'Играю на слух'],[4500,'Маэстро']];
 const levelOf=p=>{let l=0;LEVELS.forEach((L,i)=>{if(p>=L[0])l=i;});return l;};
@@ -471,7 +476,7 @@ function sync(){const P=G.phase;document.body.classList.toggle('is-done',P==='do
  $('#doneActions').style.display=P==='done'?'grid':'none';
  $('#pianoWrap').style.display=settings.piano?'':'none';
  renderDots();updateDockH();}
-function renderHead(){$('#mTitle').textContent=G.song.title;$('#mAuthor').textContent=G.song.author+(G.song.random?'':' · фрагмент');
+function renderHead(){$('#mTitle').textContent=G.song.title;$('#mAuthor').textContent=G.song.author;
  $('#mLen').textContent=G.frag.length+' '+plural(G.frag.length,['нота','ноты','нот']);$('#mBpm').textContent='♩ = '+settings.bpm;
  $('#selMelody').value=G.song.random?'random':G.song.id;}
 function renderStats(){$('#stStreak').textContent=G.streak;$('#stAcc').textContent=G.sess.answered?Math.round(100*G.sess.correct/G.sess.answered)+'%':'—';
@@ -566,7 +571,8 @@ document.addEventListener('keydown',e=>{const tag=(document.activeElement&&docum
 document.addEventListener('visibilitychange',()=>{if(document.hidden&&G.phase==='listen')stopAndResume();});
 
 function buildPad(){const g=$('#padGrid');for(let n=1;n<=12;n++){const b=document.createElement('button');b.type='button';b.className='pad-btn';b.dataset.n=n;b.innerHTML='<b>'+n+'</b><small>'+INTN[n]+'</small>';g.appendChild(b);}}
-function buildSelect(){const s=$('#selMelody');s.innerHTML='<option value="random">🎲 Случайная мелодия</option>'+SONGS.map(x=>'<option value="'+x.id+'">'+x.title+'</option>').join('');}
+function buildSelect(){const s=$('#selMelody');const groups=[...new Set(SONGS.map(x=>x.group))];
+ s.innerHTML='<option value="random">🎲 Случайная мелодия</option>'+groups.map(g=>'<optgroup label="'+g+'">'+SONGS.filter(x=>x.group===g).map(x=>'<option value="'+x.id+'">'+x.title+'</option>').join('')+'</optgroup>').join('');}
 buildPad();buildSelect();renderSettings();loadMelody(SONGS[0],false);renderStats();
 if('ResizeObserver'in window){new ResizeObserver(layoutCanvas).observe(cwrap);new ResizeObserver(updateDockH).observe($('#dock'));}
 else window.addEventListener('resize',()=>{layoutCanvas();updateDockH();});
