@@ -192,7 +192,7 @@ select{width:100%;min-height:46px;background:#0C0919;color:var(--text);border:1p
  </section>
 
  <section class="card hint-card">
-  <b>Лайт-режим:</b> убраны баллы, уровни, ачивки, прогресс, конфетти, фоновые анимации и тяжёлый синтез звука. Остался только тренажёр слуха: мелодии, случайные последовательности и настройки. Если на iPhone нет звука — проверь боковой переключатель «Бесшумно» и громкость.
+  <b>Лайт-режим:</b> убраны баллы, уровни, ачивки, прогресс, конфетти и фоновые анимации. Звук — тёплый синтезаторный тембр с мягким пространством. Если на iPhone нет звука — проверь боковой переключатель «Бесшумно» и громкость.
  </section>
 </main>
 
@@ -252,25 +252,58 @@ let settings={...DEF};
 try{Object.assign(settings,JSON.parse(localStorage.getItem('kontur.light.settings')||'{}'));}catch(e){}
 const saveS=()=>{try{localStorage.setItem('kontur.light.settings',JSON.stringify(settings));}catch(e){}};
 
-/* Лёгкий звук: один осциллятор на ноту, без реверба, шума и компрессора. */
-let audio=null,master=null,activeNotes=new Set();
+/* Тёплый синтезаторный звук: несколько партиалов, мягкий фильтр, лёгкая пространственная обработка.
+   Без постоянной перерисовки кадров — звук событийный, поэтому телефон не греется от рендера. */
+let audio=null,master=null,bus=null,noiseBuf=null,activeNotes=new Set();
+function makeIR(sec,decay){
+ const len=Math.floor(audio.sampleRate*sec),buf=audio.createBuffer(2,len,audio.sampleRate);
+ for(let ch=0;ch<2;ch++){const d=buf.getChannelData(ch);for(let i=0;i<len;i++)d[i]=(Math.random()*2-1)*Math.pow(1-i/len,decay);}
+ return buf;
+}
 function ensureAudio(){
  if(settings.muted)return null;
  if(audio){if(audio.state==='suspended')audio.resume();return audio;}
  const C=window.AudioContext||window.webkitAudioContext;if(!C)return null;
- audio=new C();master=audio.createGain();master.gain.value=.55;master.connect(audio.destination);
+ audio=new C();
+ master=audio.createGain();master.gain.value=.8;
+ const comp=audio.createDynamicsCompressor();
+ comp.threshold.value=-16;comp.knee.value=18;comp.ratio.value=4;comp.attack.value=.004;comp.release.value=.24;
+ master.connect(comp);comp.connect(audio.destination);
+ bus=audio.createGain();bus.gain.value=1;bus.connect(master);
+ const conv=audio.createConvolver();conv.buffer=makeIR(1.3,2.8);
+ const wet=audio.createGain();wet.gain.value=.25;
+ bus.connect(conv);conv.connect(wet);wet.connect(master);
+ const nb=audio.createBuffer(1,Math.floor(audio.sampleRate*.05),audio.sampleRate),nd=nb.getChannelData(0);
+ for(let i=0;i<nd.length;i++)nd[i]=(Math.random()*2-1)*Math.pow(1-i/nd.length,2);
+ noiseBuf=nb;
  return audio;
 }
 function playTone(midi,t,dur){
  if(!audio||settings.muted)return;
- const o=audio.createOscillator(),g=audio.createGain();
- o.type='triangle';o.frequency.value=mfreq(midi);
+ const f=mfreq(midi),tail=Math.min(1.1,Math.max(.3,dur*1.2));
+ const g=audio.createGain(),lp=audio.createBiquadFilter();
+ lp.type='lowpass';lp.frequency.value=Math.min(8500,f*6);lp.Q.value=.5;
+ lp.connect(g);g.connect(bus);
+ const peak=.22;
  g.gain.setValueAtTime(0,t);
- g.gain.linearRampToValueAtTime(.5,t+.01);
- g.gain.exponentialRampToValueAtTime(.001,t+dur);
- o.connect(g);g.connect(master);
- o.start(t);o.stop(t+dur+.03);
- activeNotes.add(o);o.onended=()=>activeNotes.delete(o);
+ g.gain.linearRampToValueAtTime(peak,t+.008);
+ g.gain.exponentialRampToValueAtTime(Math.max(.001,peak*.35),t+Math.min(.12,dur*.5));
+ g.gain.exponentialRampToValueAtTime(.0001,t+dur+tail);
+ const parts=[[1,1,'triangle'],[2,.32,'sine'],[3,.13,'sine']];
+ for(const[r,a,type]of parts){
+  const o=audio.createOscillator();o.type=type;o.frequency.value=f*r;o.detune.value=Math.random()*6-3;
+  const og=audio.createGain();og.gain.value=a;o.connect(og);og.connect(lp);
+  o.start(t);o.stop(t+dur+tail+.05);
+  activeNotes.add(o);o.onended=()=>activeNotes.delete(o);
+ }
+ if(noiseBuf){
+  const ns=audio.createBufferSource();ns.buffer=noiseBuf;
+  const nf=audio.createBiquadFilter();nf.type='bandpass';nf.frequency.value=Math.min(7000,f*3);nf.Q.value=1.1;
+  const ng=audio.createGain();ng.gain.setValueAtTime(.05,t);ng.gain.exponentialRampToValueAtTime(.0001,t+.045);
+  ns.connect(nf);nf.connect(ng);ng.connect(bus);
+  ns.start(t);ns.stop(t+.06);
+  activeNotes.add(ns);ns.onended=()=>activeNotes.delete(ns);
+ }
 }
 document.addEventListener('pointerdown',()=>{if(!settings.muted)ensureAudio();},{once:true,capture:true});
 
@@ -553,7 +586,7 @@ $('#btnRandom').addEventListener('click',()=>loadItem(makeRandom()));
 $('#btnSound').addEventListener('click',()=>{
  settings.muted=!settings.muted;saveS();
  if(settings.muted){stopPlayback();if(master)master.gain.value=0;}
- else{ensureAudio();if(master)master.gain.value=.55;}
+ else{ensureAudio();if(master)master.gain.value=.8;}
  renderSettings();
 });
 $('#selMelody').addEventListener('change',e=>{
