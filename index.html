@@ -62,6 +62,7 @@ main{max-width:640px;margin:0 auto;padding:12px 12px calc(var(--dock-h) + 22px);
 .status .good{color:var(--green)}.status .bad{color:var(--red)}
 .status .up{color:var(--amber)}.status .down{color:var(--blue)}.status .same{color:#C9BFFF}
 .status .dim{color:var(--dim);font-family:ui-monospace,Menlo,monospace;font-size:11px}
+.status .study{display:block;margin-top:5px;font-size:11.5px;color:var(--muted)}
 .dots{display:flex;gap:5px;flex-wrap:wrap;min-height:11px;margin-top:6px}
 .dot{width:10px;height:10px;border-radius:50%;border:1.5px solid var(--line)}
 .dot.cur{border-color:var(--amber)}
@@ -99,7 +100,10 @@ select{width:100%;min-height:46px;background:#0C0919;color:var(--text);border:1p
 
 .dock{position:fixed;left:0;right:0;bottom:0;z-index:60;background:var(--bg);border-top:1px solid var(--line);padding:9px 12px calc(9px + env(safe-area-inset-bottom))}
 .dock-in{max-width:640px;margin:0 auto}
-.dock-status{font-size:12px;font-weight:800;color:#D6CFF0;text-align:center;margin-bottom:8px;min-height:17px}
+.dock-status{font-size:12px;font-weight:800;color:#D6CFF0;text-align:center;margin-bottom:8px;min-height:17px;line-height:1.4}
+.dock-status .up{color:var(--amber)}.dock-status .down{color:var(--blue)}.dock-status .same{color:#C9BFFF}
+.dock-status .dim{color:var(--dim);font-family:ui-monospace,Menlo,monospace;font-size:11px}
+.dock-status .good{color:var(--green)}.dock-status .bad{color:var(--red)}
 .answers{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
 .ans{display:flex;flex-direction:column;align-items:center;gap:2px;padding:9px 4px;border-radius:14px;background:var(--card2);border:1.5px solid var(--bc);min-height:64px;user-select:none}
 .ans .arr{font-size:25px;line-height:1;font-weight:900;color:var(--c)}
@@ -120,8 +124,9 @@ select{width:100%;min-height:46px;background:#0C0919;color:var(--text);border:1p
 .pad-btn{display:flex;flex-direction:column;align-items:center;gap:1px;padding:6px 1px;border-radius:9px;border:1px solid var(--line);background:#14102A;min-height:42px}
 .pad-btn b{font-family:ui-monospace,Menlo,monospace;font-size:14px}
 .pad-btn small{font-size:7.5px;color:var(--muted);line-height:1}
-.done-actions{display:none;grid-template-columns:1fr 1fr;gap:8px}
-@media(max-width:380px){.pad-grid{grid-template-columns:repeat(4,1fr)}.seg-row{grid-template-columns:1fr}.brand-sub{display:none}}
+.done-actions,.feedback-actions{display:none;grid-template-columns:1fr 1fr;gap:8px}
+.feedback-actions{grid-template-columns:1fr 1.35fr}
+@media(max-width:380px){.pad-grid{grid-template-columns:repeat(4,1fr)}.seg-row{grid-template-columns:1fr}.brand-sub{display:none}.feedback-actions{grid-template-columns:1fr}}
 @media(prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
 </style>
 </head>
@@ -192,7 +197,7 @@ select{width:100%;min-height:46px;background:#0C0919;color:var(--text);border:1p
  </section>
 
  <section class="card hint-card">
-  <b>Лайт-режим:</b> убраны баллы, уровни, ачивки, прогресс, конфетти и фоновые анимации. Звук — тёплый синтезаторный тембр с мягким пространством. Если на iPhone нет звука — проверь боковой переключатель «Бесшумно» и громкость.
+  <b>Как теперь работает ошибка:</b> после неверного ответа приложение останавливается и ждёт. Прочитай направление, интервал и ноты, нажми «↻ Послушать пару» сколько нужно, затем «Понятно, дальше →». Дальше вручную не перескочит, пока ты не нажмёшь. Звук — тёплый синтезаторный тембр. Если на iPhone нет звука — проверь боковой переключатель «Бесшумно» и громкость.
  </section>
 </main>
 
@@ -207,6 +212,10 @@ select{width:100%;min-height:46px;background:#0C0919;color:var(--text);border:1p
   <div class="pad" id="pad">
    <div class="pad-title"><span>На сколько полутонов?</span><button class="pad-back" id="padBack">← назад</button></div>
    <div class="pad-grid" id="padGrid"></div>
+  </div>
+  <div class="feedback-actions" id="feedbackActions">
+   <button class="btn ghost" id="fbPair">↻ Послушать пару</button>
+   <button class="btn primary" id="fbNext">Понятно, дальше →</button>
   </div>
   <div class="done-actions" id="doneActions">
    <button class="btn ghost" id="dockAgain">↻ Ещё раз</button>
@@ -312,7 +321,7 @@ function playTone(midi,t,dur){
 document.addEventListener('pointerdown',()=>{if(!settings.muted)ensureAudio();},{once:true,capture:true});
 
 /* Состояние */
-const G={item:null,frag:[],trans:[],answers:[],phase:'idle',q:0,pendingQ:0,started:false,activeNote:-1,lastDir:null};
+const G={item:null,frag:[],trans:[],answers:[],phase:'idle',q:0,pendingQ:0,started:false,activeNote:-1,lastDir:null,awaitingContinue:false,lastOk:null};
 let playToken=0,playTimers=[],roundTimers=[],randCounter=0,reloadTimer=null;
 function later(fn,ms){const id=setTimeout(()=>{roundTimers=roundTimers.filter(t=>t!==id);fn();},ms);roundTimers.push(id);}
 function clearRound(){roundTimers.forEach(clearTimeout);roundTimers=[];}
@@ -342,6 +351,15 @@ function playNotes(indices,done){
  },Math.max(0,endDelay)));
 }
 const replayAt=i=>playNotes([i,i+1]);
+function canReplayPair(){
+ const P=G.phase;
+ return ['question','distance','done'].includes(P)||(P==='feedback'&&G.awaitingContinue);
+}
+function replayPair(){
+ if(!canReplayPair())return;
+ clearRound();
+ replayAt(G.q);
+}
 
 /* Генератор случайных последовательностей */
 const SCALES={
@@ -415,14 +433,14 @@ function renderContour(){
   if(isActive)fill='#FFB224';
   s+='<circle cx="'+px+'" cy="'+py+'" r="'+(isActive?6:isCurrent?6:4.5)+'" fill="'+fill+'" stroke="'+stroke+'" stroke-width="2"/>';
   if(rv){
- s+='<text x="'+px+'" y="'+(H-22)+'" text-anchor="middle" font-size="9" fill="#D6CFF0" font-family="ui-monospace,Menlo,monospace">'+mname(G.frag[i])+'</text>';
- s+='<text x="'+px+'" y="'+(H-8)+'" text-anchor="middle" font-size="8" fill="#A79FC8" font-family="ui-monospace,Menlo,monospace">('+mnameRu(G.frag[i])+')</text>';
-}
+   s+='<text x="'+px+'" y="'+(H-22)+'" text-anchor="middle" font-size="9" fill="#D6CFF0" font-family="ui-monospace,Menlo,monospace">'+mname(G.frag[i])+'</text>';
+   s+='<text x="'+px+'" y="'+(H-8)+'" text-anchor="middle" font-size="8" fill="#A79FC8" font-family="ui-monospace,Menlo,monospace">('+mnameRu(G.frag[i])+')</text>';
+  }
   s+='<text x="'+px+'" y="10" text-anchor="middle" font-size="8" fill="'+(isCurrent?'#FFB224':'#746C99')+'" font-family="ui-monospace,Menlo,monospace">'+(i+1)+'</text>';
  }
  s+='</svg>';el.innerHTML=s;
-const focus=G.activeNote>=0?G.activeNote:((G.phase==='question'||G.phase==='distance')?G.q+1:-1);
-if(focus>=0)el.scrollLeft=Math.max(0,x(focus)-el.clientWidth/2);
+ const focus=G.activeNote>=0?G.activeNote:((G.phase==='question'||G.phase==='distance')?G.q+1:-1);
+ if(focus>=0)el.scrollLeft=Math.max(0,x(focus)-el.clientWidth/2);
 }
 function renderDots(){
  $('#dots').innerHTML=G.trans.map((t,i)=>{
@@ -439,12 +457,14 @@ function updateDockH(){document.documentElement.style.setProperty('--dock-h',$('
 function sync(){
  const P=G.phase,main=$('#btnMain');
  const labels={idle:'▶ Слушать',listen:'⏹ Стоп',question:settings.mode==='whole'?'▶ Целиком':'⟲ Сначала',distance:settings.mode==='whole'?'▶ Целиком':'⟲ Сначала',feedback:'…',done:'▶ Ещё раз'};
- main.textContent=labels[P];main.disabled=P==='feedback';
- $('#btnPair').disabled=!['question','distance','done'].includes(P);
+ main.textContent=P==='feedback'?(G.awaitingContinue?'→ Дальше':'…'):labels[P];
+ main.disabled=P==='feedback'&&!G.awaitingContinue;
+ $('#btnPair').disabled=!canReplayPair();
  $('#btnRestart').disabled=P==='idle';
  $$('.ans').forEach(b=>b.disabled=P!=='question');
- $('#answers').style.display=(P==='distance'||P==='done')?'none':'grid';
+ $('#answers').style.display=(P==='distance'||P==='done'||(P==='feedback'&&G.awaitingContinue))?'none':'grid';
  $('#pad').classList.toggle('show',P==='distance');
+ $('#feedbackActions').style.display=(P==='feedback'&&G.awaitingContinue)?'grid':'none';
  $('#doneActions').style.display=P==='done'?'grid':'none';
  renderDots();renderContour();updateDockH();
 }
@@ -475,13 +495,13 @@ function loadItem(item,autoplay=false){
  clearRound();stopPlayback();clearFlashes();
  G.item=item;G.frag=prepareFrag(item);
  G.trans=G.frag.slice(1).map((m,i)=>({a:G.frag[i],b:m,dir:m>G.frag[i]?'up':m<G.frag[i]?'down':'same',int:Math.abs(m-G.frag[i])}));
- G.answers=[];G.q=0;G.pendingQ=0;G.started=false;G.phase='idle';G.activeNote=-1;G.lastDir=null;
+ G.answers=[];G.q=0;G.pendingQ=0;G.started=false;G.phase='idle';G.activeNote=-1;G.lastDir=null;G.awaitingContinue=false;G.lastOk=null;
  renderHead();setStatus(idleStatus());setDock('Нажми «Слушать»');sync();
  if(autoplay)startRound();
 }
 function startRound(){
  clearRound();stopPlayback();clearFlashes();
- G.answers=[];G.q=0;G.pendingQ=0;G.started=true;G.phase='listen';
+ G.answers=[];G.q=0;G.pendingQ=0;G.started=true;G.phase='listen';G.awaitingContinue=false;G.lastOk=null;
  if(settings.mode==='whole'){
   setStatus('Слушай мелодию целиком…');setDock('Слушай внимательно…');
   playNotes(G.frag.map((_,i)=>i),()=>beginQuestion(0));
@@ -492,7 +512,7 @@ function startRound(){
  sync();
 }
 function beginQuestion(i){
- G.q=i;G.phase='question';clearFlashes();
+ G.q=i;G.phase='question';G.awaitingContinue=false;G.lastOk=null;clearFlashes();
  setStatus('Нота <b>'+(i+2)+'</b> из '+G.frag.length+': куда пошла мелодия?');
  setDock('Нота '+(i+2)+'/'+G.frag.length+': куда пошла мелодия?');
  sync();
@@ -518,7 +538,7 @@ function answerDist(d){
 function finishAnswer(guessDir,guessDist){
  const i=G.q,t=G.trans[i],dirOK=guessDir===t.dir;
  const ok=settings.stage===1?dirOK:(dirOK&&(t.dir==='same'||guessDist===t.int));
- G.answers[i]={guessDir,guessDist,ok};G.phase='feedback';
+ G.answers[i]={guessDir,guessDist,ok};G.phase='feedback';G.lastOk=ok;G.awaitingContinue=!ok;
  const btn=$('#ans'+cap(guessDir));btn.classList.add(ok?'flash-good':'flash-bad');
  if(!ok)$('#ans'+cap(t.dir)).classList.add('flash-reveal');
  setTimeout(clearFlashes,900);
@@ -530,14 +550,20 @@ function finishAnswer(guessDir,guessDist){
   setDock('✓ Верно');
  }else{
   const partial=settings.stage===2&&dirOK;
-  const dHtml=t.dir!=='same'?' на <b>'+t.int+'</b> '+pt(t.int):'';
-  setStatus('<span class="bad">✗ '+(partial?'Направление верное, но расстояние — нет':'Не то')+'.</span> Было: '+dirHtml+dHtml+' · '+names);
-  setDock('✗ Было: '+DIRW[t.dir]+' '+DIRA[t.dir]);
-  later(()=>{if(G.phase==='feedback')replayAt(i);},250);
+  const dHtml=t.dir!=='same'?' на <b>'+t.int+'</b> '+pt(t.int)+' ('+INTN[t.int]+')':'';
+  setStatus('<span class="bad">✗ '+(partial?'Направление верное, но расстояние — нет':'Не то')+'.</span> Было: '+dirHtml+dHtml+' · '+names+
+   '<span class="study">Разбери ошибку: переслушай пару сколько нужно и нажми «Понятно, дальше →».</span>');
+  setDock('<span class="bad">✗ Было:</span> '+dirHtml+dHtml+' · '+names);
+  later(()=>{if(G.phase==='feedback'&&G.awaitingContinue)replayAt(i);},250);
  }
  sync();
- const wrongDelay=Math.max(1500,60000/settings.bpm*2+450);
- later(advance,ok?650:wrongDelay);
+ if(ok)later(advance,650);
+}
+function continueAfterError(){
+ if(!(G.phase==='feedback'&&G.awaitingContinue))return;
+ G.awaitingContinue=false;
+ clearRound();stopPlayback();
+ advance();
 }
 function advance(){
  const next=G.q+1;
@@ -550,7 +576,7 @@ function advance(){
  }
 }
 function finishRound(){
- G.phase='done';
+ G.phase='done';G.awaitingContinue=false;G.lastOk=null;
  setStatus('Раунд завершён. Можно повторить или перейти дальше.');
  setDock('Раунд завершён');
  sync();
@@ -568,6 +594,7 @@ function stopAndResume(){
 }
 function phaseAction(){
  const P=G.phase;
+ if(P==='feedback'&&G.awaitingContinue){continueAfterError();return;}
  if(P==='idle'||P==='done')startRound();
  else if(P==='listen')stopAndResume();
  else if(P==='question'||P==='distance'){
@@ -584,13 +611,15 @@ function scheduleReload(){
 
 /* Обработчики */
 $('#btnMain').addEventListener('click',phaseAction);
-$('#btnPair').addEventListener('click',()=>{if(['question','distance','done'].includes(G.phase))replayAt(G.q);});
+$('#btnPair').addEventListener('click',replayPair);
 $('#btnRestart').addEventListener('click',()=>{if(G.phase!=='idle')startRound();});
 $$('.ans').forEach(b=>b.addEventListener('click',()=>answer(b.dataset.dir)));
 $('#padGrid').addEventListener('click',e=>{const b=e.target.closest('.pad-btn');if(b)answerDist(+b.dataset.n);});
 $('#padBack').addEventListener('click',()=>{if(G.phase==='distance')beginQuestion(G.q);});
 $('#dockAgain').addEventListener('click',startRound);
 $('#dockNext').addEventListener('click',nextItem);
+$('#fbPair').addEventListener('click',replayPair);
+$('#fbNext').addEventListener('click',continueAfterError);
 $('#btnRandom').addEventListener('click',()=>loadItem(makeRandom()));
 $('#btnSound').addEventListener('click',()=>{
  settings.muted=!settings.muted;saveS();
@@ -636,9 +665,19 @@ document.addEventListener('keydown',e=>{
  const c=e.code;
  if(c==='ArrowUp'){e.preventDefault();answer('up');}
  else if(c==='ArrowDown'){e.preventDefault();answer('down');}
- else if(c==='ArrowRight'||c==='Space'){e.preventDefault();if(G.phase==='idle')startRound();else if(G.phase==='done')nextItem();else answer('same');}
- else if(c==='KeyR'){e.preventDefault();if(['question','distance','done'].includes(G.phase))replayAt(G.q);}
- else if(c==='Enter'){if(G.phase==='idle'){e.preventDefault();startRound();}else if(G.phase==='done'){e.preventDefault();nextItem();}}
+ else if(c==='ArrowRight'||c==='Space'){
+  e.preventDefault();
+  if(G.phase==='idle')startRound();
+  else if(G.phase==='done')nextItem();
+  else if(G.phase==='feedback'&&G.awaitingContinue)continueAfterError();
+  else answer('same');
+ }
+ else if(c==='KeyR'){e.preventDefault();replayPair();}
+ else if(c==='Enter'){
+  if(G.phase==='idle'){e.preventDefault();startRound();}
+  else if(G.phase==='done'){e.preventDefault();nextItem();}
+  else if(G.phase==='feedback'&&G.awaitingContinue){e.preventDefault();continueAfterError();}
+ }
  else if(c==='Escape'){if(G.phase==='listen')stopAndResume();else stopPlayback();}
  else if(G.phase==='distance'){
   let n=null;
